@@ -43,6 +43,7 @@ class GUI:
 
 
     def save_to_database(self, ip_address, os_details):
+        connection = None
         try:
             connection = psycopg2.connect(
                 host="localhost",
