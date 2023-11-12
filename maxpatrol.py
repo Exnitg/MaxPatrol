@@ -124,7 +124,8 @@ class GUI:
         table_copy.heading('Timestamp', text='Timestamp')
 
         table_copy.bind('<Double-Button-1>', lambda event, table_copy=table_copy: self.show_os_details(event, table_copy))
-
+        
+        connection = None
         try:
             connection = psycopg2.connect(
                 host="localhost",
