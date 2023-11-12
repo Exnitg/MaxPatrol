@@ -139,7 +139,8 @@ class GUI:
             rows = cursor.fetchall()
 
             for row in rows:
-                table_copy.insert('', 'end', values=(row[0], row[1], row[2], row[3]))
+                decoded_row = [item.decode('utf-8') if isinstance(item, bytes) else item for item in row]
+                table_copy.insert('', 'end', values=decoded_row)
 
         except Exception as e:
             print(f"Error fetching data from database: {str(e)}")
