@@ -139,7 +139,7 @@ class GUI:
             rows = cursor.fetchall()
 
             for row in rows:
-                decoded_row = [item.decode('utf-8', 'replace') if isinstance(item, bytes) else item for item in row]
+                decoded_row = [str(item, 'utf-8', 'replace') if isinstance(item, bytes) else item for item in row]
                 table_copy.insert('', 'end', values=decoded_row)
 
         except Exception as e:
