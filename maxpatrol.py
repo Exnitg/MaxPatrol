@@ -37,28 +37,36 @@ class GUI:
         x_coordinate = int((screen_width - window_width) / 2)
         y_coordinate = int((screen_height - window_height) / 2)
 
-        self.master.geometry(f"335x600+{x_coordinate}+{y_coordinate}")
+        self.master.geometry(f"700x500+{x_coordinate}+{y_coordinate}")
 
         logging.basicConfig(filename='app_log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
+    def save_to_database(self, ip, os_info):
+        postgres_host = self.postgres_host_entry.get()
+        postgres_db = self.postgres_db_entry.get()
+        postgres_user = self.postgres_user_entry.get()
+        postgres_password = self.postgres_password_entry.get()
 
-    def save_to_database(self, ip_address, os_details):
+        if not postgres_host or not postgres_db or not postgres_user or not postgres_password:
+            self.show_message("Error", "Please fill in all database fields.")
+            return
+
         connection = None
         try:
             connection = psycopg2.connect(
-                host="localhost",
-                database="OSInformation",
-                user="root",
-                password="22134314"
+                host=postgres_host,
+                database=postgres_db,
+                user=postgres_user,
+                password=postgres_password
             )
             cursor = connection.cursor()
 
             cursor.execute("INSERT INTO os_info (ip_address, os_details, timestamp) VALUES (%s, %s, %s)",
-                (ip_address, os_details, datetime.now()))
+                           (ip, os_info, datetime.now()))
             connection.commit()
 
         except Exception as e:
-            pass
+            print(f"Error connecting to PostgreSQL: {str(e)}")
 
         finally:
             if connection:
@@ -102,12 +110,39 @@ class GUI:
         self.output_text.grid(row=5, column=0, columnspan=2, padx=5, pady=5)
 
         self.show_table_button = tk.Button(self.master, text="Show Table", command=self.show_table, bg=self.gui_style.button_color, font=self.gui_style.font, fg=self.gui_style.text_color)
-        self.show_table_button.grid(row=7, column=0, columnspan=2, pady=10)
+        self.show_table_button.grid(row=4, column=2, columnspan=2, pady=10)
 
         self.clear_table_button = tk.Button(self.master, text="Clear Table", command=self.clear_table, bg=self.gui_style.button_color, font=self.gui_style.font, fg=self.gui_style.text_color)
-        self.clear_table_button.grid(row=8, column=0, columnspan=2, pady=10)
+        self.clear_table_button.grid(row=5, column=2, columnspan=2, pady=10)
+
+        tk.Label(self.master, text="PostgreSQL Host:", bg=self.gui_style.background_color, fg=self.gui_style.text_color, font=self.gui_style.font).grid(row=0, column=2, padx=5, pady=5)
+        self.postgres_host_entry = tk.Entry(self.master, bg=self.gui_style.textbox_color, font=self.gui_style.font, fg=self.gui_style.text_color)
+        self.postgres_host_entry.grid(row=0, column=3, padx=5, pady=5)
+
+        tk.Label(self.master, text="PostgreSQL Database:", bg=self.gui_style.background_color, fg=self.gui_style.text_color, font=self.gui_style.font).grid(row=1, column=2, padx=5, pady=5)
+        self.postgres_db_entry = tk.Entry(self.master, bg=self.gui_style.textbox_color, font=self.gui_style.font, fg=self.gui_style.text_color)
+        self.postgres_db_entry.grid(row=1, column=3, padx=5, pady=5)
+
+        tk.Label(self.master, text="PostgreSQL User:", bg=self.gui_style.background_color, fg=self.gui_style.text_color, font=self.gui_style.font).grid(row=2, column=2, padx=5, pady=5)
+        self.postgres_user_entry = tk.Entry(self.master, bg=self.gui_style.textbox_color, font=self.gui_style.font, fg=self.gui_style.text_color)
+        self.postgres_user_entry.grid(row=2, column=3, padx=5, pady=5)
+
+        tk.Label(self.master, text="PostgreSQL Password:", bg=self.gui_style.background_color, fg=self.gui_style.text_color, font=self.gui_style.font).grid(row=3, column=2, padx=5, pady=5)
+        self.postgres_password_entry = tk.Entry(self.master, show="*", bg=self.gui_style.textbox_color, font=self.gui_style.font, fg=self.gui_style.text_color)
+        self.postgres_password_entry.grid(row=3, column=3, padx=5, pady=5)
+
 
     def show_table(self):
+        
+        postgres_host = self.postgres_host_entry.get()
+        postgres_db = self.postgres_db_entry.get()
+        postgres_user = self.postgres_user_entry.get()
+        postgres_password = self.postgres_password_entry.get()
+
+        if not postgres_host or not postgres_db or not postgres_user or not postgres_password:
+            self.show_message("Error", "Please fill in all database fields.")
+            return
+
         table_window = tk.Toplevel(self.master)
         table_window.title("Data Table")
         
@@ -125,13 +160,18 @@ class GUI:
 
         table_copy.bind('<Double-Button-1>', lambda event, table_copy=table_copy: self.show_os_details(event, table_copy))
 
+        postgres_host = self.postgres_host_entry.get()
+        postgres_db = self.postgres_db_entry.get()
+        postgres_user = self.postgres_user_entry.get()
+        postgres_password = self.postgres_password_entry.get()
+
         connection = None
         try:
             connection = psycopg2.connect(
-                host="localhost",
-                database="OSInformation",
-                user="root",
-                password="22134314"
+                host=postgres_host,
+                database=postgres_db,
+                user=postgres_user,
+                password=postgres_password
             )
             cursor = connection.cursor()
 
@@ -172,13 +212,22 @@ class GUI:
             pass
 
     def clear_table(self):
+        postgres_host = self.postgres_host_entry.get()
+        postgres_db = self.postgres_db_entry.get()
+        postgres_user = self.postgres_user_entry.get()
+        postgres_password = self.postgres_password_entry.get()
+
+        if not postgres_host or not postgres_db or not postgres_user or not postgres_password:
+            self.show_message("Error", "Please fill in all database fields.")
+            return
+
         connection = None
         try:
             connection = psycopg2.connect(
-                host="localhost",
-                database="OSInformation",
-                user="root",
-                password="22134314"
+                host=postgres_host,
+                database=postgres_db,
+                user=postgres_user,
+                password=postgres_password
             )
             cursor = connection.cursor()
 
@@ -189,7 +238,6 @@ class GUI:
             connection.commit()
 
             self.output_text.delete(1.0, tk.END)
-
 
         except Exception as e:
             print(f"Error clearing table: {str(e)}")
@@ -206,7 +254,12 @@ class GUI:
         username = self.username_entry.get()
         password = self.password_entry.get()
 
-        if not ip or not port or not username or not password:
+        postgres_host = self.postgres_host_entry.get()
+        postgres_db = self.postgres_db_entry.get()
+        postgres_user = self.postgres_user_entry.get()
+        postgres_password = self.postgres_password_entry.get()
+
+        if not ip or not port or not username or not password or not postgres_host or not postgres_db or not postgres_user or not postgres_password:
             self.show_message("Error", "Please fill in all fields.")
             return
 
@@ -223,18 +276,17 @@ class GUI:
             r"(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$"
         )
 
-
         self.output_text.delete(1.0, tk.END)
-        
+
         if "-" in ip:
             self.connect_ssh_range(ip, port, username, password)
         elif not ip_pattern.match(ip):
             self.show_message("Error", "Invalid IP address. Please enter a valid IP.")
         else:
-            self.connect_ssh_single(ip, port, username, password)
+            self.connect_ssh_single(ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password)
 
-    def connect_ssh_single(self, ip, port, username, password):
-        scanner = MaxPatrol(ip, port, username, password)
+    def connect_ssh_single(self, ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password):
+        scanner = MaxPatrol(ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password)
 
         if scanner.connect_ssh():
             os_info = scanner.detect_OS()
@@ -273,12 +325,16 @@ class GUI:
 
 
 class MaxPatrol:
-    def __init__(self, ip, port, username, password):
+    def __init__(self, ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password, gui_instance=None):
         self.ip = ip
         self.port = port
         self.username = username
         self.password = password
-        self.ssh = None
+        self.postgres_host = postgres_host
+        self.postgres_db = postgres_db
+        self.postgres_user = postgres_user
+        self.postgres_password = postgres_password
+        self.gui_instance = gui_instance
 
     def connect_ssh(self):
         try:
@@ -286,13 +342,23 @@ class MaxPatrol:
             self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.ssh.connect(self.ip, port=self.port, username=self.username, password=self.password)
 
-            if hasattr(self, 'gui_instance'):
+            if self.gui_instance:
                 self.gui_instance.save_to_database(self.ip, "Connection established")
+
+            if self.gui_instance and hasattr(self.gui_instance, 'save_to_database_postgres'):
+                self.gui_instance.save_to_database_postgres(
+                    self.postgres_host,
+                    self.postgres_db,
+                    self.postgres_user,
+                    self.postgres_password
+                )
 
             return True
         except Exception as e:
             print(f"Error connecting to {self.ip}: {str(e)}")
             return False
+
+
     
     def set_gui_instance(self, gui_instance):
         self.gui_instance = gui_instance
@@ -343,7 +409,9 @@ class MaxPatrol:
 def main():
     gui_style = GUIStyle()
     root = tk.Tk()
-    max_patrol_instance = MaxPatrol("", 0, "", "")
+    
+    max_patrol_instance = MaxPatrol("", 0, "", "", "", "", "", "")
+    
     app = GUI(root, gui_style, max_patrol_instance)
     max_patrol_instance.set_gui_instance(app)
     root.mainloop()
