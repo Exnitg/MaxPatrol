@@ -27,7 +27,7 @@ class GUI:
 
         self.clear_log_file()
 
-        self.create_widgets()
+        self.widgets()
 
         window_width = 500
         window_height = 500
@@ -41,14 +41,14 @@ class GUI:
 
         logging.basicConfig(filename='app_log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
-    def save_to_database(self, ip, os_info):
+    def savedatabase(self, ip, os_info):
         postgres_host = self.postgres_host_entry.get()
         postgres_db = self.postgres_db_entry.get()
         postgres_user = self.postgres_user_entry.get()
         postgres_password = self.postgres_password_entry.get()
 
         if not postgres_host or not postgres_db or not postgres_user or not postgres_password:
-            self.show_message("Error", "Please fill in all database fields.")
+            self.mshow("Error", "Please fill in all database fields.")
             return
 
         connection = None
@@ -84,7 +84,7 @@ class GUI:
     def log_error(self, message):
         logging.error(message)
 
-    def create_widgets(self):
+    def widgets(self):
         self.master.configure(bg=self.gui_style.background_color)
 
         tk.Label(self.master, text="IP:", bg=self.gui_style.background_color, fg=self.gui_style.text_color, font=self.gui_style.font).grid(row=0, column=0, padx=5, pady=5)
@@ -103,13 +103,13 @@ class GUI:
         self.password_entry = tk.Entry(self.master, show="*", bg=self.gui_style.textbox_color, font=self.gui_style.font, fg=self.gui_style.text_color)
         self.password_entry.grid(row=3, column=1, padx=5, pady=5)
 
-        self.connect_button = tk.Button(self.master, text="Connect", command=self.connect_ssh, bg=self.gui_style.button_color, font=self.gui_style.font, fg=self.gui_style.text_color)
+        self.connect_button = tk.Button(self.master, text="Connect", command=self.sshconnect, bg=self.gui_style.button_color, font=self.gui_style.font, fg=self.gui_style.text_color)
         self.connect_button.grid(row=4, column=0, columnspan=2, pady=10)
 
         self.output_text = tk.Text(self.master, height=10, width=40, bg=self.gui_style.textbox_color, font=self.gui_style.font, fg=self.gui_style.text_color)
         self.output_text.grid(row=5, column=0, columnspan=2, padx=5, pady=5)
 
-        self.show_table_button = tk.Button(self.master, text="Show Table", command=self.show_table, bg=self.gui_style.button_color, font=self.gui_style.font, fg=self.gui_style.text_color)
+        self.show_table_button = tk.Button(self.master, text="Show Table", command=self.showtable, bg=self.gui_style.button_color, font=self.gui_style.font, fg=self.gui_style.text_color)
         self.show_table_button.grid(row=4, column=2, columnspan=2, pady=10)
 
         self.clear_table_button = tk.Button(self.master, text="Clear Table", command=self.clear_table, bg=self.gui_style.button_color, font=self.gui_style.font, fg=self.gui_style.text_color)
@@ -132,7 +132,7 @@ class GUI:
         self.postgres_password_entry.grid(row=3, column=3, padx=5, pady=5)
 
 
-    def show_table(self):
+    def showtable(self):
         
         postgres_host = self.postgres_host_entry.get()
         postgres_db = self.postgres_db_entry.get()
@@ -140,7 +140,7 @@ class GUI:
         postgres_password = self.postgres_password_entry.get()
 
         if not postgres_host or not postgres_db or not postgres_user or not postgres_password:
-            self.show_message("Error", "Please fill in all database fields.")
+            self.mshow("Error", "Please fill in all database fields.")
             return
 
         table_window = tk.Toplevel(self.master)
@@ -158,7 +158,7 @@ class GUI:
         table_copy.heading('OS Details', text='OS Details')
         table_copy.heading('Timestamp', text='Timestamp')
 
-        table_copy.bind('<Double-Button-1>', lambda event, table_copy=table_copy: self.show_os_details(event, table_copy))
+        table_copy.bind('<Double-Button-1>', lambda event, table_copy=table_copy: self.showosdetails(event, table_copy))
 
         postgres_host = self.postgres_host_entry.get()
         postgres_db = self.postgres_db_entry.get()
@@ -202,12 +202,12 @@ class GUI:
 
         return table_copy
 
-    def show_os_details(self, event, table_copy):
+    def showosdetails(self, event, table_copy):
         item = table_copy.selection()
         if item:
             item = item[0]
             os_details = table_copy.item(item, 'values')[2]
-            self.show_message('OS Details', os_details)
+            self.mshow('OS Details', os_details)
         else:
             pass
 
@@ -218,7 +218,7 @@ class GUI:
         postgres_password = self.postgres_password_entry.get()
 
         if not postgres_host or not postgres_db or not postgres_user or not postgres_password:
-            self.show_message("Error", "Please fill in all database fields.")
+            self.mshow("Error", "Please fill in all database fields.")
             return
 
         connection = None
@@ -248,7 +248,7 @@ class GUI:
                 connection.close()
 
 
-    def connect_ssh(self):
+    def sshconnect(self):
         ip = self.ip_entry.get()
         port = self.port_entry.get()
         username = self.username_entry.get()
@@ -260,13 +260,13 @@ class GUI:
         postgres_password = self.postgres_password_entry.get()
 
         if not ip or not port or not username or not password or not postgres_host or not postgres_db or not postgres_user or not postgres_password:
-            self.show_message("Error", "Please fill in all fields.")
+            self.mshow("Error", "Please fill in all fields.")
             return
 
         try:
             port = int(port)
         except ValueError:
-            self.show_message("Error", "Invalid port. Please enter a valid integer.")
+            self.mshow("Error", "Invalid port. Please enter a valid integer.")
             return
 
         ip_pattern = re.compile(
@@ -279,32 +279,32 @@ class GUI:
         self.output_text.delete(1.0, tk.END)
 
         if "-" in ip:
-            self.connect_ssh_range(ip, port, username, password)
+            self.rangessh(ip, port, username, password)
         elif not ip_pattern.match(ip):
-            self.show_message("Error", "Invalid IP address. Please enter a valid IP.")
+            self.mshow("Error", "Invalid IP address. Please enter a valid IP.")
         else:
-            self.connect_ssh_single(ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password)
+            self.singlesshconnect(ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password)
 
-    def connect_ssh_single(self, ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password):
+    def singlesshconnect(self, ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password):
         scanner = MaxPatrol(ip, port, username, password, postgres_host, postgres_db, postgres_user, postgres_password)
 
-        if scanner.connect_ssh():
+        if scanner.sshconnect():
             os_info = scanner.detect_OS()
             self.output_text.insert(tk.END, os_info + "\n")
             self.log_info(f"Connected to {ip} successfully at {datetime.now()}")
-            self.save_to_database(ip, os_info)
+            self.savedatabase(ip, os_info)
             scanner.ssh.close()
         else:
-            self.show_message("Error", f"Unable to establish SSH connection to {ip}.")
+            self.mshow("Error", f"Unable to establish SSH connection to {ip}.")
             self.log_error(f"Failed to connect to {ip} at {datetime.now()}")
 
-    def connect_ssh_range(self, ip_range, port, username, password):
+    def rangessh(self, ip_range, port, username, password):
         start_ip, end_ip = ip_range.split('-')
-        ip_list = self.generate_ip_list(start_ip, end_ip)
+        ip_list = self.genlist(start_ip, end_ip)
         for ip in ip_list:
-            self.connect_ssh_single(ip, port, username, password)
+            self.singlesshconnect(ip, port, username, password)
 
-    def generate_ip_list(self, start_ip, end_ip):
+    def genlist(self, start_ip, end_ip):
         start = list(map(int, start_ip.split('.')))
         end = list(map(int, end_ip.split('.')))
         ip_list = []
@@ -320,7 +320,7 @@ class GUI:
 
         return ip_list
 
-    def show_message(self, title, message):
+    def mshow(self, title, message):
         messagebox.showinfo(title, message)
 
 
@@ -336,7 +336,7 @@ class MaxPatrol:
         self.postgres_password = postgres_password
         self.gui_instance = gui_instance
 
-    def connect_ssh(self):
+    def sshconnect(self):
         try:
             self.ssh = paramiko.SSHClient()
             self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -360,7 +360,7 @@ class MaxPatrol:
 
 
     
-    def set_gui_instance(self, gui_instance):
+    def set_gui(self, gui_instance):
         self.gui_instance = gui_instance
 
     def execute(self, command):
@@ -413,7 +413,7 @@ def main():
     max_patrol_instance = MaxPatrol("", 0, "", "", "", "", "", "")
     
     app = GUI(root, gui_style, max_patrol_instance)
-    max_patrol_instance.set_gui_instance(app)
+    max_patrol_instance.set_gui(app)
     root.mainloop()
 
 if __name__ == "__main__":
